@@ -1,9 +1,20 @@
 import filesize from "filesize";
 import React, { useContext, useEffect, useState } from "react";
-import { View, Text } from "react-native";
+import { View } from "react-native";
 import { AuthenticatedServersContext } from "../context/AuthenticatedServers";
 import api from "../helpers/api";
 import { time } from "../helpers/utils";
+import {
+  Box,
+  Heading,
+  AspectRatio,
+  Image,
+  Text,
+  Center,
+  HStack,
+  Stack,
+  NativeBaseProvider,
+} from "native-base";
 
 export type OctoJob = {
   job: {
@@ -38,7 +49,7 @@ export const CurrentJob = () => {
   useEffect(() => {
     const fetchAndSetCurrentJob = async () => {
       const job: OctoJob = await api.get("job", currentServer);
-      setCurrentJob(job);
+      setCurrentJob(!job || job.error ? undefined : job);
     }
 
     fetchAndSetCurrentJob();

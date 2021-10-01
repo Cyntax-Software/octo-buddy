@@ -1,20 +1,10 @@
 import React, { useEffect, useState } from 'react';
-import { SafeAreaView, StyleSheet } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
-import { CurrentJob } from './components/CurrentJob';
-import { Temperatures } from './components/Temperatures';
 import { Server, AuthenticatedServersContext } from './context/AuthenticatedServers';
 import { ServerSelect } from './screens/ServerSelect';
 import Storage from './helpers/storage';
-
-export const styles = StyleSheet.create({
-  screen: {
-    display: "flex",
-    alignItems: "center",
-    justifyContent: "center",
-    height: "100%",
-  }
-});
+import { NativeBaseProvider } from 'native-base';
+import { Dashboard } from './screens/Dashboard';
 
 export default function App() {
   const [authenticatedServers, setAuthenticatedServers] = useState<Array<Server>>([]);
@@ -30,36 +20,35 @@ export default function App() {
   }, []);
 
   return (
-    <AuthenticatedServersContext.Provider value={{
-      authenticatedServers,
-      currentServer,
-      setCurrentServer: (server) => {
-        const updateAuthenticatedServers = (servers: Array<Server>) => {
-          Storage.set("authenticatedServers", servers);
-          setAuthenticatedServers(servers);
-        }
-
-        if (server) {
-          if (authenticatedServers.find(s => s.ip === server.ip)) {
-            updateAuthenticatedServers(authenticatedServers.map(s => s.ip === server.ip ? server : s))
-          } else {
-            updateAuthenticatedServers([...authenticatedServers, server])
+    <NativeBaseProvider>
+      <AuthenticatedServersContext.Provider value={{
+        authenticatedServers,
+        currentServer,
+        setCurrentServer: (server) => {
+          const updateAuthenticatedServers = (servers: Array<Server>) => {
+            Storage.set("authenticatedServers", servers);
+            setAuthenticatedServers(servers);
           }
-        }
 
-        setCurrentServer(server);
-      },
-    }}>
-      <StatusBar style="auto" />
+          if (server) {
+            if (authenticatedServers.find(s => s.ip === server.ip)) {
+              updateAuthenticatedServers(authenticatedServers.map(s => s.ip === server.ip ? server : s))
+            } else {
+              updateAuthenticatedServers([...authenticatedServers, server])
+            }
+          }
 
-      {!currentServer ? (
-        <ServerSelect />
-      ) : (
-        <SafeAreaView style={styles.screen}>
-          <Temperatures />
-          <CurrentJob />
-        </SafeAreaView>
-      )}
-    </AuthenticatedServersContext.Provider>
+          setCurrentServer(server);
+        },
+      }}>
+        <StatusBar style="auto" />
+
+        {!currentServer ? (
+          <ServerSelect />
+        ) : (
+          <Dashboard />
+        )}
+      </AuthenticatedServersContext.Provider>
+    </NativeBaseProvider>
   );
 };

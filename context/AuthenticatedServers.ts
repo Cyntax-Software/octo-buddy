@@ -2,6 +2,7 @@ import { createContext } from "react";
 
 export type Server = {
   ip: string;
+  name?: string;
   apiKey?: string;
 };
 
