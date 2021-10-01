@@ -17,6 +17,8 @@ export const ManualAddServerScreen = (props: SelectServerNavigationProp<"ManualA
           <Input
             autoFocus
             value={ip}
+            keyboardType="numeric"
+            fontSize="md"
             backgroundColor="white"
             onChangeText={(ip) => {
               setIp(ip);

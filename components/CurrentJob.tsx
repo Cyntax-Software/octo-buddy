@@ -5,16 +5,9 @@ import { AuthenticatedServersContext } from "../context/AuthenticatedServers";
 import api from "../helpers/api";
 import { time } from "../helpers/utils";
 import {
-  Box,
-  Heading,
-  AspectRatio,
-  Image,
   Text,
-  Center,
-  HStack,
-  Stack,
-  NativeBaseProvider,
 } from "native-base";
+import { useIsMounted } from "../helpers/hooks";
 
 export type OctoJob = {
   job: {
@@ -39,6 +32,7 @@ export type OctoJob = {
 
 export const CurrentJob = () => {
   const { currentServer } = useContext(AuthenticatedServersContext);
+  const isMounted = useIsMounted();
 
   if (!currentServer) {
     throw new Error("No server found");
@@ -49,6 +43,7 @@ export const CurrentJob = () => {
   useEffect(() => {
     const fetchAndSetCurrentJob = async () => {
       const job: OctoJob = await api.get("job", currentServer);
+      if (isMounted.current) return;
       setCurrentJob(!job || job.error ? undefined : job);
     }
 

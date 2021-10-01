@@ -1,6 +1,6 @@
 import { Server } from "../context/AuthenticatedServers";
 
-const timeout = 300;
+const timeout = 500;
 
 export const url = (ip: string, path: string = "") => `http://${ip}/api/${path}`;
 

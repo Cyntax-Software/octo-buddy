@@ -1,4 +1,4 @@
-import { Button, FormControl, Input, Link, VStack } from "native-base";
+import { Button, FormControl, Input, Link, VStack, Text, Divider, Alert, Spacer } from "native-base";
 import React, { useContext, useState } from "react";
 import { SelectServerNavigationProp } from ".";
 import { Screen } from "../../components/Elements";
@@ -13,22 +13,21 @@ export const ConnectToServerScreen = (props: SelectServerNavigationProp<"Connect
 
   return (
     <Screen>
-      <FormControl mb="6">
-        <VStack mx="4">
-          <FormControl.Label>IP Address:</FormControl.Label>
-          <Input
-            isDisabled
-            value={props.route.params.server.ip}
-            backgroundColor="white"
-          />
-        </VStack>
-      </FormControl>
+      <Alert flexDir="row" borderRadius="10" mx="4" colorScheme="emerald">
+        <Alert.Icon size="xs" mr="3" />
+        <Text>
+          <Text bold>Printer IP:</Text> {props.route.params.server.ip}
+        </Text>
+      </Alert>
 
-      <FormControl mb="6">
+      <Divider my="4" />
+
+      <FormControl mb="4">
         <VStack mx="4">
-          <FormControl.Label>Name:</FormControl.Label>
+          <FormControl.Label>Printer Name:</FormControl.Label>
           <Input
             autoFocus
+            fontSize="md"
             value={name}
             placeholder="Unnamed Printer"
             onChangeText={setName}
@@ -42,6 +41,7 @@ export const ConnectToServerScreen = (props: SelectServerNavigationProp<"Connect
           <FormControl.Label>API Key:</FormControl.Label>
           <Input
             value={apiKey}
+            fontSize="md"
             onChangeText={setApiKey}
             backgroundColor="white"
           />
@@ -57,7 +57,7 @@ export const ConnectToServerScreen = (props: SelectServerNavigationProp<"Connect
         onPress={() => {
           const server = {
             ...props.route.params.server,
-            name,
+            name: name.length > 0 ? name : undefined,
             apiKey
           };
 
@@ -69,16 +69,6 @@ export const ConnectToServerScreen = (props: SelectServerNavigationProp<"Connect
         }}
       >
         Connect
-      </Button>
-
-      <Button
-        variant="link"
-        mt={2}
-        onPress={() => {
-          props.navigation.popToTop();
-        }}
-      >
-        Back to server list
       </Button>
     </Screen>
   );

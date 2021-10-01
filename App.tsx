@@ -38,6 +38,7 @@ export default function App() {
             }
 
             if (server) {
+              console.log("add", { authenticatedServers, server })
               if (authenticatedServers.find(s => s.ip === server.ip)) {
                 updateAuthenticatedServers(authenticatedServers.map(s => s.ip === server.ip ? server : s))
               } else {
