@@ -2,7 +2,7 @@ import React, { useContext } from "react";
 import { CurrentJob } from "../components/CurrentJob";
 import { Temperatures } from "../components/Temperatures";
 import { Screen } from "../components/Elements";
-import { Button } from "native-base";
+import { Box, Button, Divider } from "native-base";
 import { AuthenticatedServersContext } from "../context/AuthenticatedServers";
 
 export const Dashboard = () => {
@@ -10,9 +10,10 @@ export const Dashboard = () => {
 
   return (
     <Screen>
-      <Temperatures />
       <CurrentJob />
-
+      <Divider my="6" />
+      <Temperatures />
+      <Divider my="6" />
       <Button
         variant="link"
         onPress={() => {

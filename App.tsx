@@ -1,8 +1,8 @@
-import React, { useEffect, useState } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 import { StatusBar } from 'expo-status-bar';
 import { Server, AuthenticatedServersContext } from './context/AuthenticatedServers';
 import Storage from './helpers/storage';
-import { NativeBaseProvider } from 'native-base';
+import { NativeBaseProvider, useTheme } from 'native-base';
 import { Dashboard } from './stacks/Dashboard';
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
@@ -38,7 +38,6 @@ export default function App() {
             }
 
             if (server) {
-              console.log("add", { authenticatedServers, server })
               if (authenticatedServers.find(s => s.ip === server.ip)) {
                 updateAuthenticatedServers(authenticatedServers.map(s => s.ip === server.ip ? server : s))
               } else {
@@ -52,12 +51,31 @@ export default function App() {
             {!currentServer ? (
               <SelectServerStack />
             ) : (
-              <Stack.Navigator>
-                <Stack.Screen name={currentServer.name ?? "Unnamed Server"} component={Dashboard} />
-              </Stack.Navigator>
+              <AppStack />
             )}
         </AuthenticatedServersContext.Provider>
       </NavigationContainer>
     </NativeBaseProvider>
   );
 };
+
+const AppStack = () => {
+  const theme = useTheme();
+  const { currentServer } = useContext(AuthenticatedServersContext);
+
+  if (!currentServer) {
+    throw new Error("Tried to load app stack without a selected server");
+  }
+
+  return (
+    <Stack.Navigator
+      screenOptions={{
+        contentStyle: {
+          backgroundColor: theme.colors.muted["100"]
+        }
+      }}
+    >
+      <Stack.Screen name={currentServer.name ?? "Unnamed Server"} component={Dashboard} />
+    </Stack.Navigator>
+  )
+}
