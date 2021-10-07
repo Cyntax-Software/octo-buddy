@@ -1,5 +1,4 @@
-import React, { useContext, useEffect, useState } from "react";
-import { AuthenticatedServersContext } from "../context/AuthenticatedServers";
+import React, { useEffect, useState } from "react";
 import api from "../helpers/api";
 import {
   Box,
@@ -12,41 +11,17 @@ import {
 } from "native-base";
 import { useIsMounted } from "../helpers/hooks";
 import moment from "moment";
+import { Job, Server } from "../types";
 
-export type OctoJob = {
-  job: {
-    file: {
-      name: string,
-      origin: "local" | "sdcard", // TODO: what options are there?
-      size: number,
-      date: number
-    },
-    estimatedPrintTime: number,
-    filament: any // TODO
-  },
-  progress: {
-    completion: number,
-    filepos: number,
-    printTime: number,
-    printTimeLeft: number
-  },
-  state: string, // e.g. “Operational” or “Printing” - need exhaustive list
-  error?: string,
-} | null;
-
-export const CurrentJob = (props: IBoxProps) => {
-  const { currentServer } = useContext(AuthenticatedServersContext);
+export const CurrentJob = (props: IBoxProps & {
+  server: Server;
+}) => {
   const isMounted = useIsMounted();
-
-  if (!currentServer) {
-    throw new Error("No server found");
-  }
-
-  const [currentJob, setCurrentJob] = useState<OctoJob>();
+  const [currentJob, setCurrentJob] = useState<Job>();
 
   useEffect(() => {
     const fetchAndSetCurrentJob = async () => {
-      const job: OctoJob = await api.get("job", currentServer);
+      const job: Job = await api.get("job", props.server);
       if (!isMounted.current) return;
       setCurrentJob(!job || job.error ? undefined : job);
     }
@@ -61,7 +36,9 @@ export const CurrentJob = (props: IBoxProps) => {
   }, []);
 
   const timePrinting = currentJob ? moment().subtract(currentJob.progress.printTime, "seconds") : null;
-  const timeRemaining = currentJob ? moment().add(currentJob.progress.printTimeLeft, "seconds") : null;
+  const timeRemaining = currentJob?.progress.printTimeLeft ? moment().add(currentJob.progress.printTimeLeft, "seconds") : null;
+
+  console.log({ currentJob })
 
   return (
     <Box
@@ -83,31 +60,18 @@ export const CurrentJob = (props: IBoxProps) => {
           <HStack justifyContent="space-between" mb="1">
             <VStack>
               <Heading size="sm">{currentJob.state}</Heading>
-            <Text fontSize="xs">{currentJob.job.file.name}</Text>
+              <Text fontSize="xs" numberOfLines={1} ellipsizeMode="tail">{currentJob.job.file.name}</Text>
             </VStack>
-            <Box
-              bg="primary.500"
-              borderRadius="100"
-              maxW="10"
-              maxH="10"
-              minW="10"
-              minH="10"
-              ml="2"
-              alignItems="center"
-              justifyContent="center"
-            >
-              <Text bold color="white">{currentJob.progress.completion.toFixed(0)}%</Text>
-            </Box>
           </HStack>
 
-          <Progress value={currentJob.progress.completion} size="lg" mt="4" />
+          <Progress value={currentJob.progress.completion} size="sm" mt="4" borderRadius="5" colorScheme="emerald" />
 
           {[{
             label: "Time printing",
             value: timePrinting?.fromNow(true)
           }, {
             label: "Time remaining",
-            value: timeRemaining ? `about ${timeRemaining.fromNow(true)}` : `Calculating...`
+            value: timeRemaining ? `about ${timeRemaining.fromNow(true)}` : `~`
           }].map((data, i) => (
             <HStack
               key={data.label}

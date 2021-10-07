@@ -1,9 +1,8 @@
-import { Server } from "../context/AuthenticatedServers";
+import { config } from "../config";
+import { Server } from "../types";
 
 const timeout = 500;
-
-export const url = (ip: string, path: string = "") => `http://${ip}/api/${path}`;
-
+const url = (ip: string, path: string = "") => `http://${ip}/api/${path}`;
 const serialize = (obj: { [key: string]: string }) => {
   return Object.entries(obj)
     .map(
@@ -49,7 +48,7 @@ function xhr<T = unknown>(
         });
       }
     }),
-    new Promise((_, reject) => setTimeout(() => reject(new Error('Request timeout')), timeout))
+    new Promise((_, reject) => setTimeout(() => reject(new Error('Request timeout')), config.apiRequestTimeout))
   ]);
 }
 

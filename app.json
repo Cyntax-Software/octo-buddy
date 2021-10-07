@@ -23,7 +23,8 @@
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#FFFFFF"
-      }
+      },
+      "package": "tax.cyn.octobuddy"
     },
     "web": {
       "favicon": "./assets/favicon.png"

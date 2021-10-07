@@ -1,64 +1,21 @@
 import React, { useContext, useEffect, useState } from "react";
-import { AuthenticatedServersContext } from "../context/AuthenticatedServers";
 import { Box, HStack, Text, useTheme, VStack } from "native-base";
 import api from "../helpers/api";
 import { useIsMounted } from "../helpers/hooks";
 import { AnimatedCircularProgress } from "react-native-circular-progress";
+import { Printer, Server } from "../types";
 
-type Temperature = {
-  actual: number;
-  target: number;
-}
-
-type TemperatureWithOffset = Temperature & {
-  offset: number;
-}
-
-type OctoPrinter = {
-  temperature: {
-    tool0: TemperatureWithOffset;
-    tool1: TemperatureWithOffset;
-    bed: TemperatureWithOffset;
-    history: Array<{
-      time: number;
-      tool0: Temperature;
-      tool1: Temperature;
-      bed: Temperature;
-    }>;
-  };
-  sd: {
-    ready: boolean;
-  };
-  state: {
-    text: string; // TODO: actual options
-    flags: {
-      operational: boolean;
-      paused: boolean;
-      printing: boolean;
-      cancelling: boolean;
-      pausing: boolean;
-      sdReady: boolean;
-      error: boolean;
-      ready: boolean;
-      closedOrError: boolean;
-    }
-  }
-}
-
-export const Temperatures = () => {
-  const { currentServer } = useContext(AuthenticatedServersContext);
+export const Temperatures = (props: {
+  server: Server;
+}) => {
   const isMounted = useIsMounted();
   const theme = useTheme();
 
-  if (!currentServer) {
-    throw new Error("No server found");
-  }
-
-  const [printerData, setPrinterData] = useState<OctoPrinter>();
+  const [printerData, setPrinterData] = useState<Printer>();
 
   useEffect(() => {
     const fetchAndSetPrinterData = async () => {
-      const printer: OctoPrinter = await api.get("printer", currentServer);
+      const printer: Printer = await api.get("printer", props.server);
       if (!isMounted.current) return;
       setPrinterData(printer ?? undefined);
     }
@@ -87,7 +44,7 @@ export const Temperatures = () => {
           <VStack alignItems="center">
             <Text bold mb="4">Printing Temp</Text>
             <AnimatedCircularProgress
-              size={120}
+              size={110}
               width={12}
               prefill={(100 / printerData.temperature.tool0.target) * printerData.temperature.tool0.actual}
               fill={(100 / printerData.temperature.tool0.target) * printerData.temperature.tool0.actual}
@@ -105,7 +62,7 @@ export const Temperatures = () => {
           <VStack alignItems="center">
             <Text bold mb="4">Bed Temp</Text>
             <AnimatedCircularProgress
-              size={120}
+              size={110}
               width={12}
               prefill={(100 / printerData.temperature.bed.target) * printerData.temperature.bed.actual}
               fill={(100 / printerData.temperature.bed.target) * printerData.temperature.bed.actual}

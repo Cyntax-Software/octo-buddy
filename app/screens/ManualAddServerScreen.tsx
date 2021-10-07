@@ -1,18 +1,18 @@
 import { Button, FormControl, Input, VStack, WarningOutlineIcon } from "native-base";
 import React, { useState } from "react";
-import api from "../../helpers/api";
-import { Screen } from "../../components/Elements";
-import { SelectServerNavigationProp } from ".";
+import api from "../helpers/api";
+import { Screen } from "../components/Screen";
+import { AppNavigationProp } from "../navigation";
 
-export const ManualAddServerScreen = (props: SelectServerNavigationProp<"ManualAdd">) => {
+export const ManualAddServerScreen = (props: AppNavigationProp<"ManualAdd">) => {
   const [ip, setIp] = useState("");
   const [error, setError] = useState<string>();
 
   return (
     <Screen>
-      <FormControl isRequired isInvalid={!!error}>
+      <FormControl isRequired isInvalid={!!error} mt="4">
         <VStack mx="4">
-          <FormControl.Label>IP Address:</FormControl.Label>
+          <FormControl.Label>Printer IP Address:</FormControl.Label>
 
           <Input
             autoFocus
@@ -24,7 +24,6 @@ export const ManualAddServerScreen = (props: SelectServerNavigationProp<"ManualA
               setIp(ip);
               setError(undefined);
             }}
-            placeholder="XXX.XXX.XXX.XXX"
           />
 
           <FormControl.ErrorMessage leftIcon={<WarningOutlineIcon size="xs" />}>

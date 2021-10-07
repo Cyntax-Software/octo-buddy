@@ -9,7 +9,6 @@ const styles = StyleSheet.create({
     minHeight: "100%",
     alignItems: "center",
     justifyContent: "flex-start",
-    paddingTop: 20,
   },
   scroll: {
     width: 500,
@@ -20,8 +19,8 @@ const styles = StyleSheet.create({
 export const Screen = (props: { children: React.ReactNode }) => {
   return (
     <SafeAreaView style={styles.screen}>
-      <KeyboardAvoidingView>
-        <Box w="500" maxW="100%">
+      <KeyboardAvoidingView w="100%" minW="100%" maxW="100%" alignItems="center">
+        <Box w="800" maxW="100%">
           {props.children}
         </Box>
       </KeyboardAvoidingView>
