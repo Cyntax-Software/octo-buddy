@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import { Box, Button, CircleIcon, Divider, FlatList, HStack, Spacer, Text, VStack, Pressable, Container } from "native-base";
 import api from "../helpers/api";
 import { Screen } from "../components/Screen";
@@ -9,19 +9,16 @@ import { getIpAddressAsync } from "expo-network";
 import { useIsMounted } from "../helpers/hooks";
 import { Server } from "../types";
 import { config } from "../config";
-import { AuthenticatedServers } from "../models/AuthenticatedServer";
+import Storage from "../helpers/storage";
+import { AuthenticatedServersContext } from "../context/AuthenticatedServer";
 
 export const SelectServerScreen = (props: AppNavigationProp<"SelectServer">) => {
+  const { authenticatedServers } = useContext(AuthenticatedServersContext);
   const isMounted = useIsMounted();
 
   const [status, setStatus] = useState<"searching" | "complete">(Platform.OS === "web" ? "complete" : "searching");
-  const [authenticatedServers, setAuthenticatedServers] = useState<Array<Server>>([]);
   const [unauthenticatedServers, setUnauthenticatedServers] = useState<Array<Server>>([]);
   const [searchNum, setSearchNum] = useState(1);
-
-  useEffect(() => {
-    AuthenticatedServers.all().then(setAuthenticatedServers)
-  }, []);
 
   useEffect(() => {
     const checkForServer = async () => {
@@ -61,60 +58,67 @@ export const SelectServerScreen = (props: AppNavigationProp<"SelectServer">) => 
       .catch(() => false);
   }
 
-  // const authServerIps = authenticatedServers.map(s => s.ip);
-
   return (
     <Screen>
-      <VStack height="100%" justifyContent="space-between" mt="4">
-        <FlatList
-          data={[
-            ...authenticatedServers.map(s => ({ ...s, authenticated: true })),
-            ...unauthenticatedServers.map(s => ({ ...s, authenticated: false })),
-          ]}
-          keyExtractor={(server) => server.ip}
-          ListEmptyComponent={(
-            <Box
-              rounded="lg"
-              overflow="hidden"
-              borderColor="coolGray.200"
-              backgroundColor="white"
-              borderWidth="1"
-              px="5"
-              py="3"
-              mx="4"
-            >
-              <Text>{status === "searching" ? "Searching for printers" : "No printers found"}</Text>
-            </Box>
-          )}
-          renderItem={({ item: server }) => (
-            <ServerListItem
-              server={server}
-              onPress={async () => {
-                const connected = await attemptConnection(server);
+      <Spacer mt="4" />
 
-                if (!connected) {
-                  props.navigation.navigate("ConnectToServer", { server });
-                } else {
-                  props.navigation.navigate("Dashboard", { server });
-                }
-              }}
-            />
-          )}
-        />
-
-        <Box>
-          <Divider my="5" />
-          <Button
+      <FlatList
+        data={[
+          ...authenticatedServers.map(s => ({ ...s, authenticated: true })),
+          // ...unauthenticatedServers.map(s => ({ ...s, authenticated: false })),
+        ]}
+        keyExtractor={(server) => server.ip}
+        ListEmptyComponent={(
+          <Box
+            rounded="lg"
+            overflow="hidden"
+            borderColor="coolGray.200"
+            backgroundColor="white"
+            borderWidth="1"
+            px="5"
+            py="3"
             mx="4"
-            mb="4"
-            children={"Add a server"}
-            leftIcon={<MaterialIcons name="add" size={20} color="white" />}
-            onPress={() => {
-              props.navigation.navigate("ManualAdd");
+          >
+            <Text>{status === "searching" ? "Searching for printers" : "No printers found"}</Text>
+          </Box>
+        )}
+        renderItem={({ item: server }) => (
+          <ServerListItem
+            server={server}
+            onPress={async () => {
+              const authorised = await attemptConnection(server);
+
+              if (authorised) {
+                props.navigation.navigate("Dashboard", { server });
+              } else {
+                props.navigation.navigate("ConnectToServer", { server });
+              }
             }}
           />
-        </Box>
-      </VStack>
+        )}
+      />
+
+      <Divider my="5" />
+
+      <Button
+        mx="4"
+        mb="4"
+        children={"Add a server"}
+        leftIcon={<MaterialIcons name="add" size={20} color="white" />}
+        onPress={() => {
+          props.navigation.navigate("ManualAdd");
+        }}
+      />
+
+      <Button
+        mx="4"
+        mb="4"
+        colorScheme="danger"
+        children={"Clear storage"}
+        onPress={() => {
+          Storage.clear();
+        }}
+      />
     </Screen>
   )
 };

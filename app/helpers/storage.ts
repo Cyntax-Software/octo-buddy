@@ -34,4 +34,11 @@ export default class Storage {
       throw StorageError("Error removing from local storage", error as Error);
     }
   }
+
+  static async clear() {
+    try {
+      return await AsyncStorage.clear();
+    } catch (error) {
+      throw StorageError("Error clearing local storage", error as Error);
+    }  }
 }

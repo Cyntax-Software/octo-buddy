@@ -1,11 +1,11 @@
 import { Button, FormControl, Input, VStack, Text, Alert } from "native-base";
-import React, { useState } from "react";
+import React, { useContext, useState } from "react";
 import { Screen } from "../components/Screen";
-import api from "../helpers/api";
-import { AuthenticatedServers } from "../models/AuthenticatedServer";
+import { AuthenticatedServersContext } from "../context/AuthenticatedServer";
 import { AppNavigationProp } from "../navigation";
 
 export const ConnectToServerScreen = (props: AppNavigationProp<"ConnectToServer">) => {
+  const { connectToServer } = useContext(AuthenticatedServersContext);
   const { server } = props.route.params;
 
   const [name, setName] = useState("");
@@ -51,21 +51,19 @@ export const ConnectToServerScreen = (props: AppNavigationProp<"ConnectToServer"
       <Button
         mt="4"
         mx="4"
-        onPress={() => {
+        onPress={async () => {
           const server = {
             ...props.route.params.server,
             name: name.length > 0 ? name : undefined,
             apiKey
           };
 
-          api.get("version", server)
-            .then(async () => {
-              AuthenticatedServers.add(server);
-              props.navigation.push("Dashboard", { server });
-            })
-            .catch(() => {
-              // TODO: display error?
-            });
+          const connected = await connectToServer(server);
+
+          if (connected) {
+            props.navigation.popToTop();
+            props.navigation.push("Dashboard", { server });
+          }
         }}
       >
         Connect
