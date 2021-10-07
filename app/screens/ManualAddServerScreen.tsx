@@ -36,7 +36,7 @@ export const ManualAddServerScreen = (props: AppNavigationProp<"ManualAdd">) => 
         mt="4"
         mx="4"
         onPress={async () => {
-          const resp = await api.get("currentuser", { ip }).catch(() => {});
+          const resp = await api.get("api/currentuser", { ip }).catch(() => {});
 
           if (resp) {
             props.navigation.navigate("ConnectToServer", { server: { ip }});

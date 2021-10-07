@@ -17,7 +17,7 @@ export const SelectServerScreen = (props: AppNavigationProp<"SelectServer">) => 
   const isMounted = useIsMounted();
 
   const [status, setStatus] = useState<"searching" | "complete">(Platform.OS === "web" ? "complete" : "searching");
-  const [unauthenticatedServers, setUnauthenticatedServers] = useState<Array<Server>>([]);
+  const [searchedServers, setSearchedServers] = useState<Array<Server>>([]);
   const [searchNum, setSearchNum] = useState(1);
 
   useEffect(() => {
@@ -29,12 +29,10 @@ export const SelectServerScreen = (props: AppNavigationProp<"SelectServer">) => 
       const ipBase = ipAddress.split(".").splice(0, 3).join(".");
       const ip = `${ipBase}.${searchNum}`;
 
-      if (!authenticatedServers.find(s => s.ip === ip)) {
-        const resp = await api.get("currentuser", { ip }).catch(() => {});
+      const resp = await api.get("api/currentuser", { ip }).catch(() => {});
 
-        if (resp && isMounted.current) {
-          setUnauthenticatedServers([...unauthenticatedServers, { ip }]);
-        }
+      if (resp && isMounted.current) {
+        setSearchedServers([...searchedServers, { ip }]);
       }
 
       if (!isMounted.current) {
@@ -50,13 +48,16 @@ export const SelectServerScreen = (props: AppNavigationProp<"SelectServer">) => 
   }, [searchNum]);
 
   const attemptConnection = async (server: Server) => {
-    return api.get("version", server)
+    return api.get("api/version", server)
       .then(() => {
         props.navigation.push("Dashboard", { server });
         return true;
       })
       .catch(() => false);
   }
+
+  const authServerIps = authenticatedServers.map(s => s.ip);
+  const unauthenticatedServers = searchedServers.filter(s => !authServerIps.includes(s.ip));
 
   return (
     <Screen>
@@ -65,7 +66,7 @@ export const SelectServerScreen = (props: AppNavigationProp<"SelectServer">) => 
       <FlatList
         data={[
           ...authenticatedServers.map(s => ({ ...s, authenticated: true })),
-          // ...unauthenticatedServers.map(s => ({ ...s, authenticated: false })),
+          ...unauthenticatedServers.map(s => ({ ...s, authenticated: false })),
         ]}
         keyExtractor={(server) => server.ip}
         ListEmptyComponent={(
@@ -86,7 +87,7 @@ export const SelectServerScreen = (props: AppNavigationProp<"SelectServer">) => 
           <ServerListItem
             server={server}
             onPress={async () => {
-              const authorised = await attemptConnection(server);
+              const authorised = server.apiKey && await attemptConnection(server);
 
               if (authorised) {
                 props.navigation.navigate("Dashboard", { server });
@@ -128,7 +129,7 @@ const ServerListItem = (props: { server: Server & { authenticated: boolean }, on
   const [status, setStatus] = useState<"unknown" | "online" | "offline">("unknown");
 
   useEffect(() => {
-    api.get("currentuser", props.server)
+    api.get("api/currentuser", props.server)
       .then(() => {
         if (isMounted.current) setStatus("online");
       })

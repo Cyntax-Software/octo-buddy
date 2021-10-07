@@ -25,6 +25,7 @@
     "react-native-screens": "~3.4.0",
     "react-native-svg": "12.1.1",
     "react-native-web": "~0.14.01",
+    "react-native-webview": "11.6.2",
     "styled-components": "^5.3.1",
     "styled-system": "^5.1.5"
   },

@@ -21,7 +21,7 @@ export const CurrentJob = (props: IBoxProps & {
 
   useEffect(() => {
     const fetchAndSetCurrentJob = async () => {
-      const job: Job = await api.get("job", props.server);
+      const job: Job = await api.get("api/job", props.server);
       if (!isMounted.current) return;
       setCurrentJob(!job || job.error ? undefined : job);
     }
@@ -37,8 +37,6 @@ export const CurrentJob = (props: IBoxProps & {
 
   const timePrinting = currentJob ? moment().subtract(currentJob.progress.printTime, "seconds") : null;
   const timeRemaining = currentJob?.progress.printTimeLeft ? moment().add(currentJob.progress.printTimeLeft, "seconds") : null;
-
-  console.log({ currentJob })
 
   return (
     <Box

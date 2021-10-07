@@ -2,7 +2,7 @@ import { config } from "../config";
 import { Server } from "../types";
 
 const timeout = 500;
-const url = (ip: string, path: string = "") => `http://${ip}/api/${path}`;
+const url = (ip: string, path: string = "") => `http://${ip}/${path}`;
 const serialize = (obj: { [key: string]: string }) => {
   return Object.entries(obj)
     .map(

@@ -15,7 +15,7 @@ export const Temperatures = (props: {
 
   useEffect(() => {
     const fetchAndSetPrinterData = async () => {
-      const printer: Printer = await api.get("printer", props.server);
+      const printer: Printer = await api.get("api/printer", props.server);
       if (!isMounted.current) return;
       setPrinterData(printer ?? undefined);
     }

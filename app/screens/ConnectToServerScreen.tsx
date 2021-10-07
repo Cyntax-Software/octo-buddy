@@ -1,17 +1,67 @@
+import React, { useContext, useEffect, useState } from "react";
 import { Button, FormControl, Input, VStack, Text, Alert } from "native-base";
-import React, { useContext, useState } from "react";
 import { Screen } from "../components/Screen";
 import { AuthenticatedServersContext } from "../context/AuthenticatedServer";
 import { AppNavigationProp } from "../navigation";
+import api from "../helpers/api";
+import { Platform, StyleSheet } from "react-native";
+import WebView from "react-native-webview";
+
+const styles = StyleSheet.create({
+  webView: {
+    flex: 1
+  }
+})
 
 export const ConnectToServerScreen = (props: AppNavigationProp<"ConnectToServer">) => {
   const { connectToServer } = useContext(AuthenticatedServersContext);
   const { server } = props.route.params;
 
+  const [canRequestApiKey, setCanRequestApiKey] = useState(false);
+  const [appToken, setAppToken] = useState<string>();
+
+  useEffect(() => {
+    if (!appToken) return;
+
+    const interval = setInterval(async () => {
+      try {
+        const resp = await api.get(`plugin/appkeys/request/${appToken}`, server) as { message?: string, api_key?: string };
+
+        if (resp.api_key) {
+          setApiKey(resp.api_key);
+          setAppToken(undefined);
+        } else {
+        }
+      } catch {
+        clearInterval(interval);
+      }
+    }, 1000);
+
+    return () => {
+      clearInterval(interval);
+    }
+  }, [appToken]);
+
   const [name, setName] = useState("");
   const [apiKey, setApiKey] = useState("");
 
-  return (
+  useEffect(() => {
+    setCanRequestApiKey(false);
+
+    // TODO: handle web manually
+    if (Platform.OS === "web") return;
+
+    api.get("plugin/appkeys/probe", server).then(() => {
+      setCanRequestApiKey(true);
+    }).catch(() => {});
+  }, [server]);
+
+  return appToken ? (
+    <WebView
+      style={styles.webView}
+      source={{ uri: `http://${server.ip}` }}
+    />
+  ) : (
     <Screen>
       <Alert flexDir="row" colorScheme="emerald">
         <Alert.Icon size="xs" mr="3" ml="1" />
@@ -45,6 +95,16 @@ export const ConnectToServerScreen = (props: AppNavigationProp<"ConnectToServer"
             onChangeText={setApiKey}
             backgroundColor="white"
           />
+          {canRequestApiKey && (
+            <Button
+              onPress={async () => {
+                const resp = await api.post("plugin/appkeys/request", server, { app: "OctoBuddy" }) as { app_token: string };
+                setAppToken(resp.app_token);
+              }}
+            >
+              Request API Key
+            </Button>
+          )}
         </VStack>
       </FormControl>
 
@@ -69,5 +129,5 @@ export const ConnectToServerScreen = (props: AppNavigationProp<"ConnectToServer"
         Connect
       </Button>
     </Screen>
-  );
+  )
 };

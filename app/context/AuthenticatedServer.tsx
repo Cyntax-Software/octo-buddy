@@ -31,7 +31,7 @@ export const AuthenticatedServersProvider = (props: {
         authenticatedServers,
         connectToServer: async (server: Server) => {
           try {
-            await api.get("version", server);
+            await api.get("api/version", server);
 
             let allServers: Array<Server> = [];
             if (authenticatedServers.map(s => s.ip).includes(server.ip)) {
