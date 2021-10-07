@@ -1,5 +1,5 @@
 # octo-buddy
 
-Expo React Native app to manage an OctoPrint server
+Open source Expo React Native app to manage an OctoPrint server.
 
-Plans to build for Android, iOS and web (for desktop versions using a rust wrapper)
+Plans to build for Android, iOS and web (for desktop versions using a rust wrapper).
