@@ -23,19 +23,21 @@ export const SelectServerScreen = (props: AppNavigationProp<"SelectServer">) => 
   // if web - get ip from rust
   const getIpFromRust: () => Promise<string | null> = async () => {
     return new Promise((resolve) => {
-      // @ts-ignore TODO
+      // @ts-ignore TODO - custom typemapping for external?
       external.receiveIp = (ip: string) => {
-        console.log("got the IP", { ip });
+        // @ts-ignore TODO - custom typemapping for external?
+        external.receiveIp = null;
         resolve(ip);
       }
 
-      // @ts-ignore TODO
-      external.invoke("request_ip");
-      console.log("invoked");
-
       setTimeout(() => {
+        // @ts-ignore TODO - custom typemapping for external?
+        external.receiveIp = null;
         resolve(null);
       }, 500);
+
+      // @ts-ignore TODO - custom typemapping for external?
+      external.invoke("request_ip");
     });
   };
 
@@ -43,7 +45,6 @@ export const SelectServerScreen = (props: AppNavigationProp<"SelectServer">) => 
     const checkForServer = async () => {
       if (status !== "searching") return;
 
-      console.log("check for server");
       const ipAddress = Platform.OS === "web"
         ? await getIpFromRust()
         : await getIpAddressAsync();
