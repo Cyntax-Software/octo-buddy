@@ -16,16 +16,40 @@ export const SelectServerScreen = (props: AppNavigationProp<"SelectServer">) => 
   const { authenticatedServers } = useContext(AuthenticatedServersContext);
   const isMounted = useIsMounted();
 
-  const [status, setStatus] = useState<"searching" | "complete">(Platform.OS === "web" ? "complete" : "searching");
+  const [status, setStatus] = useState<"searching" | "complete">("searching");
   const [searchedServers, setSearchedServers] = useState<Array<Server>>([]);
   const [searchNum, setSearchNum] = useState(1);
+
+  // if web - get ip from rust
+  const getIpFromRust: () => Promise<string | null> = async () => {
+    return new Promise((resolve) => {
+      // @ts-ignore TODO
+      external.receiveIp = (ip: string) => {
+        console.log("got the IP", { ip });
+        resolve(ip);
+      }
+
+      // @ts-ignore TODO
+      external.invoke("request_ip");
+      console.log("invoked");
+
+      setTimeout(() => {
+        resolve(null);
+      }, 500);
+    });
+  };
 
   useEffect(() => {
     const checkForServer = async () => {
       if (status !== "searching") return;
-      if (Platform.OS === "web") return;
 
-      const ipAddress =  await getIpAddressAsync();
+      console.log("check for server");
+      const ipAddress = Platform.OS === "web"
+        ? await getIpFromRust()
+        : await getIpAddressAsync();
+
+      if (!ipAddress) return;
+
       const ipBase = ipAddress.split(".").splice(0, 3).join(".");
       const ip = `${ipBase}.${searchNum}`;
 

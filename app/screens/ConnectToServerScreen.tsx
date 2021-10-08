@@ -35,7 +35,7 @@ export const ConnectToServerScreen = (props: AppNavigationProp<"ConnectToServer"
       } catch {
         clearInterval(interval);
       }
-    }, 1000);
+    }, 300);
 
     return () => {
       clearInterval(interval);

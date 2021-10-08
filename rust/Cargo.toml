@@ -1,0 +1,30 @@
+# https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[package]
+name = "octobuddy"
+description = "Manage your OctoPrint instances."
+version = "0.1.0"
+edition = "2018"
+default-run = "web_view"
+
+# Cargo Bundle
+[package.metadata.bundle]
+identifier = "tax.cyn.octobuddy"
+version = "1.0.0"
+
+[[bin]]
+name = "web_view"
+path = "src/web_view.rs"
+
+[dependencies]
+# server
+actix-web = "4.0.0-beta.8"
+# loads react app
+web-view = "0.7.3"
+# dialogs, menus, notification tray etc
+fui_system = "0.1.0"
+
+# other things
+env_logger = "0.9"
+curl = "0.4.38"
+json = "0.12.4"
